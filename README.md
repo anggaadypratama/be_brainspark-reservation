@@ -2,7 +2,7 @@
 1. download [NODE JS](https://nodejs.org/en/download/)
 2. clone this project `git clone https://github.com/anggaadypratama/BE-BRAINSPARK-RESERVATION`
 3. download package using `npm install`
-4. copy and rename it `.env.example` to `.env`
+4. copy and rename `.env.example` to `.env`
 4. run project using `npm run dev` in development mode
 
 # RESPONSE FORMAT
