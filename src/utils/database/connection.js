@@ -8,9 +8,9 @@ mongoose.connect(dbConnection, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => {
-  console.log('Connected to the database!');
+  console.log('terhubung ke database!');
 })
   .catch((err) => {
-    console.log('Cannot connect to the database!', err);
+    console.log('tidak dapat terhubung ke database!', err);
     process.exit();
   });
