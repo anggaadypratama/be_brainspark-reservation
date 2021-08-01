@@ -5,7 +5,8 @@
         "@root/*": ["./*"],
         "@routes/*": ["./routes/*"],
         "@app/*": ["./src/middleware/*"],
-        "@utils/*": ["./src/utils/*"]
+        "@utils/*": ["./src/utils/*"],
+        "@public/*": ["./public/*"]
       }
     }
   }

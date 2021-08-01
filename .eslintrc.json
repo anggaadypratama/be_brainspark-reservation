@@ -12,6 +12,8 @@
     },
     "rules": {
         "import/no-unresolved": 0,
-        "no-console": 0
+        "no-console": 0,
+        "prefer-const": 0,
+        "no-unused-vars": 0
     }
 }

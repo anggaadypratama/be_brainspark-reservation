@@ -7,6 +7,7 @@ mongoose.Promise = global.Promise;
 mongoose.connect(dbConnection, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  useFindAndModify: false,
 }).then(() => {
   console.log('terhubung ke database!');
 })

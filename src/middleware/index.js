@@ -7,7 +7,7 @@ module.exports = (req, res, next) => {
     data,
   });
 
-  res.sendError = ({ errors, message = null, status = 400 }) => res.status(status).send({
+  res.sendError = ({ errors = [], message = null, status = 400 }) => res.status(status).send({
     success: false,
     message: message ?? 'bad_request',
     status,

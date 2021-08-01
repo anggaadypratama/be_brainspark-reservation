@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "start": "NOVE_ENV=production nodemon app.js"
   },
   "keywords": [],
   "author": "",
@@ -35,6 +36,7 @@
     "@routes": "./routes",
     "@app": "./src/app",
     "@middleware": "./src/middleware",
-    "@utils": "./src/utils"
+    "@utils": "./src/utils",
+    "@public": "./public"
   }
 }
