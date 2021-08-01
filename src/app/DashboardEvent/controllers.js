@@ -56,8 +56,8 @@ module.exports = {
 
     const isRegistrationClosed = await DashboardEventModel.updateMany({
       $or: [{
-        totalRegistration: {
-          $eq: dataForFilter.ticketLimit,
+        ticketLimit: {
+          $eq: dataForFilter.participant.length,
         },
       }, {
         endRegistration: {

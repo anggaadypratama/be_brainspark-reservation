@@ -49,9 +49,6 @@ const eventSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  totalRegistration: {
-    type: Number,
-  },
   note: {
     type: Object,
   },
