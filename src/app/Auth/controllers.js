@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const message = require('@utils/messages');
 const User = require('./model');
 
 const jwtKey = process.env.API_JWT_KEY;
@@ -14,7 +15,7 @@ module.exports = {
     if (username === userDB?.username) {
       res.sendError({
         message: {
-          username: 'username sudah ada',
+          username: message.user_exists,
         },
         status: 409,
       });
@@ -23,7 +24,7 @@ module.exports = {
         username, password,
       });
 
-      res.sendSuccess({ message: 'user berhasil ditambahkan', status: 201 });
+      res.sendSuccess({ message: message.add_data_success, status: 201 });
     }
   },
 
@@ -34,7 +35,7 @@ module.exports = {
     if (!user) {
       res.sendError({
         message: {
-          username: 'user tidak ditemukan',
+          username: message.user_not_availabe,
         },
       });
     } else if (user) {
@@ -42,16 +43,16 @@ module.exports = {
         const payload = { username: user.username, role: 'admin' };
         const token = jwt.sign(payload, jwtKey, { expiresIn: jwtExpire });
 
-        res.sendSuccess({ data: token, message: 'berhasil login' });
+        res.sendSuccess({ data: token, message: message.login_success });
       } else {
         res.sendError({
           message: {
-            password: 'password yang dimasukan salah',
+            password: message.wrong_password,
           },
         });
       }
     } else {
-      res.sendError({ message: 'tidak terautorisasi', status: 401 });
+      res.sendError({ message: message.unauthenticated, status: 401 });
     }
   },
 };
