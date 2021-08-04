@@ -5,8 +5,6 @@ const DashboardEventModel = require('./model');
 
 const validationId = new RegExp('^[0-9a-fA-F]{24}$');
 
-const baseUrl = process.env.BASE_URL;
-
 module.exports = {
   createEventPost: async (req, res) => {
     if (!req.file?.path) {
@@ -83,7 +81,7 @@ module.exports = {
     data = data.map(({
       _id, themeName, imagePoster, date, eventStart, isFinished, location,
     }) => ({
-      _id, themeName, imagePoster: baseUrl + imagePoster, date, eventStart, isFinished, location,
+      _id, themeName, imagePoster, date, eventStart, isFinished, location,
     }));
 
     switch (isDone) {
