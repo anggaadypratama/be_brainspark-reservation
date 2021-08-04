@@ -5,6 +5,8 @@ const DashboardEventModel = require('./model');
 
 const validationId = new RegExp('^[0-9a-fA-F]{24}$');
 
+const baseUrl = process.env.BASE_URL;
+
 module.exports = {
   createEventPost: async (req, res) => {
     if (!req.file?.path) {
@@ -49,15 +51,12 @@ module.exports = {
   },
 
   getAllEvent: async (req, res) => {
-    const isDone = Number(req.query.isFinished) ?? 0;
-
-    const dataForFilter = await DashboardEventModel.find()
-      .catch((errors) => errors && res.sendError({ status: 500, errors }));
+    const isDone = Number(req.query.isFinished) || 0;
 
     const isRegistrationClosed = await DashboardEventModel.updateMany({
       $or: [{
         ticketLimit: {
-          $eq: dataForFilter.participant.length,
+          $eq: 100, // expected document from database check equality
         },
       }, {
         endRegistration: {
@@ -78,8 +77,14 @@ module.exports = {
 
     console.log({ isFinishedUpdate, isRegistrationClosed });
 
-    const data = await DashboardEventModel.find()
+    let data = await DashboardEventModel.find()
       .catch((errors) => errors && res.sendError({ status: 500, errors }));
+
+    data = data.map(({
+      _id, themeName, imagePoster, date, eventStart, isFinished, location,
+    }) => ({
+      _id, themeName, imagePoster: baseUrl + imagePoster, date, eventStart, isFinished, location,
+    }));
 
     switch (isDone) {
       case 0:
@@ -113,9 +118,44 @@ module.exports = {
         if (errors) return res.sendError({ status: 500, errors });
         if (!data) return res.sendError({ status: 404, message: message.data_notfound });
 
+        const {
+          _id,
+          themeName,
+          date,
+          eventStart,
+          eventEnd,
+          speakerName,
+          location,
+          endRegistration,
+          isFinished,
+          registrationClosed,
+          isOnlyTelkom,
+          description,
+          ticketLimit,
+          imagePoster,
+        } = data;
+
+        const note = data?.note ?? {};
+
         return res.sendSuccess({
           status: 200,
-          data,
+          data: {
+            _id,
+            themeName,
+            date,
+            eventStart,
+            eventEnd,
+            speakerName,
+            location,
+            endRegistration,
+            isFinished,
+            registrationClosed,
+            isOnlyTelkom,
+            ticketLimit,
+            imagePoster,
+            description,
+            note,
+          },
         });
       });
     }
