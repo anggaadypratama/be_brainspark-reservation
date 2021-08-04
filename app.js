@@ -13,7 +13,7 @@ const app = express();
 const apiRouters = require('@routes');
 const middleware = require('@middleware');
 
-const port = process.env.API_PORT || 3000;
+const port = process.env.PORT || 3000;
 
 // middleware
 app.use(middleware);
