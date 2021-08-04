@@ -2,9 +2,11 @@
 const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
-  const token = req.headers.authorization;
+  const bearerHeader = req.headers.authorization;
 
-  if (token) {
+  if (bearerHeader) {
+    const token = bearerHeader.split(' ')[1];
+
     jwt.verify(token, process.env.API_JWT_KEY, (err, decoded) => {
       if (err) { return res.sendError({ errors: err, message: 'problem dengan token', status: 401 }); }
 
