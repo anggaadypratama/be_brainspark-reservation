@@ -43,7 +43,7 @@ module.exports = {
         const payload = { username: user.username, role: 'admin' };
         const token = jwt.sign(payload, jwtKey, { expiresIn: jwtExpire });
 
-        res.sendSuccess({ data: { token }, message: message.login_success });
+        res.sendSuccess({ data: token, message: message.login_success });
       } else {
         res.sendError({
           message: {
