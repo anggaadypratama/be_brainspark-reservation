@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const participantModel = require('../Participant/model');
+// const participantModel = require('../Participant/model');
 
 const eventSchema = new mongoose.Schema({
   themeName: {
@@ -61,7 +61,32 @@ const eventSchema = new mongoose.Schema({
     type: Boolean,
     required: true,
   },
-  participant: [participantModel],
+  participant: [{
+    namae: {
+      type:String,
+      required: true
+    },
+    email:{
+      type:String,
+      required:true
+    },
+    nim: {
+      type:String,
+    },
+    Status:{
+      type:String
+    },
+    fakultas: {
+      type:String,
+    },
+    whatsapp:{
+      type:String
+    },
+    line:{
+      type:String
+    }
+
+  }],
 });
 
 const model = mongoose.model('Event', eventSchema);
