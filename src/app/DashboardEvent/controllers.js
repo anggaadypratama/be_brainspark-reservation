@@ -15,14 +15,9 @@ module.exports = {
 
     let {
       isOnlyTelkom,
-      note,
-      description,
       ticketLimit,
       ...stringData
     } = req.body;
-
-    description = description && JSON.parse(description);
-    note = note ? JSON.parse(note) : {};
 
     isOnlyTelkom = isOnlyTelkom && JSON.parse(isOnlyTelkom)?.isOnlyTelkom;
     ticketLimit = ticketLimit && Number(ticketLimit);
@@ -32,8 +27,6 @@ module.exports = {
       isFinished: false,
       registrationClosed: false,
       isOnlyTelkom,
-      note,
-      description,
       ticketLimit,
       imagePoster,
     });
@@ -213,6 +206,8 @@ module.exports = {
   editEventById: async (req, res) => {
     const { id } = req.params;
 
+    console.log(req.body);
+
     if (!validationId.test(id)) {
       res.sendError({
         message: 'id tidak ditemukan',
@@ -251,9 +246,6 @@ module.exports = {
         ...stringData
       } = req.body;
 
-      const description = desc && JSON.parse(desc);
-      const note = notes && JSON.parse(notes);
-
       const isOnlyTelkom = onlyTelkom && JSON.parse(onlyTelkom)?.isOnlyTelkom;
       const ticketLimit = ticketLim && Number(ticketLim);
 
@@ -266,8 +258,6 @@ module.exports = {
       const data = {
         imagePoster,
         isOnlyTelkom,
-        note,
-        description,
         ticketLimit,
         ...stringData,
       };

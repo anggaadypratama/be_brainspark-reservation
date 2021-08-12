@@ -12,6 +12,7 @@ const cors = require('cors');
 const app = express();
 const apiRouters = require('@routes');
 const middleware = require('@middleware');
+const auth = require('@middleware/auth');
 
 const port = process.env.PORT || 3000;
 
@@ -28,12 +29,14 @@ app.use(cors({
 
 app.group('/api', (router) => {
   apiRouters(router);
-  router.get('/', ((req, res) => {
+  router.get('/', auth, ((req, res) => {
     res.sendSuccess({
       message: {
         name: 'brainspark reservation',
       },
     });
+
+    res.sendError({ status: 403, message: 'not authenticated' });
   }));
 });
 

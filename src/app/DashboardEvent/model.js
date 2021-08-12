@@ -11,7 +11,7 @@ const eventSchema = new mongoose.Schema({
     required: true,
   },
   description: {
-    type: Object,
+    type: String,
     required: true,
   },
   date: {
@@ -50,7 +50,7 @@ const eventSchema = new mongoose.Schema({
     required: true,
   },
   note: {
-    type: Object,
+    type: String,
   },
   // processed in server
   isFinished: {

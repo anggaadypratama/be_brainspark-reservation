@@ -19,9 +19,8 @@ const fileStorage = multer.diskStorage({
 
 const fileFilter = (req, file, callback) => {
   const { mimetype } = file;
-  const size = +req.rawHeaders.slice(-1)[0] < 1024 ** 2;
 
-  if ((FILE_TYPE.includes(mimetype)) && size) {
+  if ((FILE_TYPE.includes(mimetype))) {
     callback(null, true);
   }
 
