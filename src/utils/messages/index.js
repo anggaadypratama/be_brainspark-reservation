@@ -2,6 +2,7 @@ module.exports = {
   upload_image_problem: 'sepertinya file kamu bermasalah, pastikan bahwa file bertipe png/jpg/jpeg dan pastikan bahwa file dibawah 1MB',
   token_not_available: 'token tidak tersedia',
   user_exists: 'username sudah ada',
+  email_exists: 'alamat email sudah terdaftar',
   add_data_success: 'data berhasil ditambahkan',
   user_not_availabe: 'user tidak ditemukan',
   wrong_password: 'password yang kamu masukan salah',

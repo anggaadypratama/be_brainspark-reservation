@@ -63,28 +63,28 @@ const eventSchema = new mongoose.Schema({
   },
   participant: [{
     namae: {
-      type:String,
-      required: true
+      type: String,
+      required: true,
     },
-    email:{
-      type:String,
-      required:true
+    email: {
+      type: String,
+      required: true,
     },
     nim: {
-      type:String,
+      type: String,
     },
-    Status:{
-      type:String
+    Status: {
+      type: String,
     },
     fakultas: {
-      type:String,
+      type: String,
     },
-    whatsapp:{
-      type:String
+    whatsapp: {
+      type: String,
     },
-    line:{
-      type:String
-    }
+    line: {
+      type: String,
+    },
 
   }],
 });
