@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { stringify } = require('uuid');
 // const participantModel = require('../Participant/model');
 
 const eventSchema = new mongoose.Schema({
@@ -83,6 +84,13 @@ const eventSchema = new mongoose.Schema({
       type: String,
     },
     line: {
+      type: String,
+    },
+    isAbsen: {
+      type: String,
+      default: false,
+    },
+    feedback: {
       type: String,
     },
 
