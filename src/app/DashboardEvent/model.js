@@ -52,15 +52,6 @@ const eventSchema = new mongoose.Schema({
   note: {
     type: String,
   },
-  // processed in server
-  isFinished: {
-    type: Boolean,
-    required: true,
-  },
-  registrationClosed: {
-    type: Boolean,
-    required: true,
-  },
   participant: [participantModel],
 });
 

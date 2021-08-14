@@ -1,6 +1,7 @@
 const message = require('@utils/messages');
 const path = require('path');
 const fs = require('fs');
+const moment = require('moment');
 const DashboardEventModel = require('./model');
 
 const validationId = new RegExp('^[0-9a-fA-F]{24}$');
@@ -44,38 +45,18 @@ module.exports = {
   getAllEvent: async (req, res) => {
     const isDone = Number(req.query.isFinished) || 0;
 
-    const isRegistrationClosed = await DashboardEventModel.updateMany({
-      $or: [{
-        ticketLimit: {
-          $eq: 100, // expected document from database check equality
-        },
-      }, {
-        endRegistration: {
-          $lte: new Date(),
-        },
-      }],
-    }, {
-      registrationClosed: true,
-    }).catch((errors) => errors && res.sendError(errors));
-
-    const isFinishedUpdate = await DashboardEventModel.updateMany({
-      eventEnd: {
-        $lt: new Date(),
-      },
-    }, {
-      isFinished: true,
-    }).catch((errors) => errors && res.sendError(errors));
-
-    console.log({ isFinishedUpdate, isRegistrationClosed });
-
     let data = await DashboardEventModel.find()
       .catch((errors) => errors && res.sendError({ status: 500, errors }));
 
     data = data.map(({
-      _id, themeName, imagePoster, date, eventStart, isFinished, location,
-    }) => ({
-      _id, themeName, imagePoster, date, eventStart, isFinished, location,
-    }));
+      _id, themeName, imagePoster, date, eventStart, location, eventEnd,
+    }) => {
+      const isEventDone = moment(eventEnd).format() < moment().format();
+
+      return ({
+        _id, themeName, imagePoster, date, eventStart, isEventDone, location, eventEnd,
+      });
+    });
 
     switch (isDone) {
       case 0:
@@ -86,7 +67,79 @@ module.exports = {
       case 1:
         return res.sendSuccess({
           status: 200,
-          data: data.filter(({ isFinished }) => isFinished),
+          data: data.filter(({ isEventDone }) => isEventDone),
+        });
+      case 2:
+        return res.sendSuccess({
+          status: 200,
+          data: data.filter(({ isEventDone }) => !isEventDone),
+        });
+      default:
+        return res.sendError({
+          status: 404,
+          message: 'filter tidak ada',
+        });
+    }
+  },
+
+  getAllEventProtected: async (req, res) => {
+    const isDone = Number(req.query.isFinished) || 0;
+
+    let data = await DashboardEventModel.find()
+      .catch((errors) => errors && res.sendError({ status: 500, errors }));
+
+    const dataFiltered = data.map(({
+      themeName,
+      description,
+      date,
+      eventStart,
+      eventEnd,
+      speakerName,
+      location,
+      endRegistration,
+      note,
+      isOnlyTelkom,
+      ticketLimit,
+      imagePoster,
+      participant,
+    }) => {
+      const isEventDone = moment(eventEnd).format() < moment().format();
+
+      return {
+        themeName,
+        description,
+        date,
+        eventStart,
+        eventEnd,
+        speakerName,
+        location,
+        endRegistration,
+        note,
+        isOnlyTelkom,
+        ticketLimit,
+        imagePoster,
+        participant,
+        isEventDone,
+      };
+    });
+
+    console.log(dataFiltered);
+
+    switch (isDone) {
+      case 0:
+        return res.sendSuccess({
+          status: 200,
+          data,
+        });
+      case 1:
+        return res.sendSuccess({
+          status: 200,
+          data: dataFiltered.filter(({ isEventDone }) => isEventDone),
+        });
+      case 2:
+        return res.sendSuccess({
+          status: 200,
+          data: data.filter(({ isEventDone }) => !isEventDone),
         });
       default:
         return res.sendError({
@@ -205,8 +258,6 @@ module.exports = {
 
   editEventById: async (req, res) => {
     const { id } = req.params;
-
-    console.log(req.body);
 
     if (!validationId.test(id)) {
       res.sendError({

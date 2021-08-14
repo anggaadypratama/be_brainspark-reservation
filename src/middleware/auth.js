@@ -6,8 +6,9 @@ module.exports = (req, res, next) => {
 
   if (bearerHeader) {
     const token = bearerHeader.split(' ')[1];
+    const bearer = bearerHeader.split(' ')[0];
 
-    jwt.verify(token, process.env.API_JWT_KEY, (err, decoded) => {
+    jwt.verify(bearer === 'Bearer' && token, process.env.API_JWT_KEY, (err, decoded) => {
       if (err) { return res.sendError({ errors: err, message: 'problem dengan token', status: 401 }); }
 
       req.decoded = decoded;
