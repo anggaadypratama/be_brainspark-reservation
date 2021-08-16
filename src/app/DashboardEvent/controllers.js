@@ -45,10 +45,10 @@ module.exports = {
   getAllEvent: async (req, res) => {
     const isDone = Number(req.query.isFinished) || 0;
 
-    let data = await DashboardEventModel.find()
+    const data = await DashboardEventModel.find()
       .catch((errors) => errors && res.sendError({ status: 500, errors }));
 
-    data = data.map(({
+    const dataFiltered = data.map(({
       _id, themeName, imagePoster, date, eventStart, location, eventEnd,
     }) => {
       const isEventDone = moment(eventEnd).format() < moment().format();
@@ -62,17 +62,17 @@ module.exports = {
       case 0:
         return res.sendSuccess({
           status: 200,
-          data,
+          data: dataFiltered,
         });
       case 1:
         return res.sendSuccess({
           status: 200,
-          data: data.filter(({ isEventDone }) => isEventDone),
+          data: dataFiltered.filter(({ isEventDone }) => isEventDone),
         });
       case 2:
         return res.sendSuccess({
           status: 200,
-          data: data.filter(({ isEventDone }) => !isEventDone),
+          data: dataFiltered.filter(({ isEventDone }) => !isEventDone),
         });
       default:
         return res.sendError({
@@ -89,6 +89,7 @@ module.exports = {
       .catch((errors) => errors && res.sendError({ status: 500, errors }));
 
     const dataFiltered = data.map(({
+      _id,
       themeName,
       description,
       date,
@@ -106,6 +107,7 @@ module.exports = {
       const isEventDone = moment(eventEnd).format() < moment().format();
 
       return {
+        _id,
         themeName,
         description,
         date,
@@ -123,13 +125,11 @@ module.exports = {
       };
     });
 
-    console.log(dataFiltered);
-
     switch (isDone) {
       case 0:
         return res.sendSuccess({
           status: 200,
-          data,
+          data: dataFiltered,
         });
       case 1:
         return res.sendSuccess({
@@ -139,7 +139,7 @@ module.exports = {
       case 2:
         return res.sendSuccess({
           status: 200,
-          data: data.filter(({ isEventDone }) => !isEventDone),
+          data: dataFiltered.filter(({ isEventDone }) => !isEventDone),
         });
       default:
         return res.sendError({
@@ -170,6 +170,7 @@ module.exports = {
           eventEnd,
           speakerName,
           location,
+          linkLocation,
           endRegistration,
           isFinished,
           registrationClosed,
@@ -177,6 +178,7 @@ module.exports = {
           description,
           ticketLimit,
           imagePoster,
+          participant,
         } = data;
 
         const note = data?.note ?? {};
@@ -195,10 +197,13 @@ module.exports = {
             isFinished,
             registrationClosed,
             isOnlyTelkom,
+            linkLocation,
             ticketLimit,
             imagePoster,
             description,
+            isEventDone: moment(eventEnd).format() < moment().format(),
             note,
+            totalParticipant: participant.length,
           },
         });
       });
