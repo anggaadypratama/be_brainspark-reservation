@@ -8,6 +8,7 @@ const express = require('express');
 const compression = require('compression');
 const path = require('path');
 const cors = require('cors');
+const morgan = require('morgan');
 
 const app = express();
 const apiRouters = require('@routes');
@@ -26,6 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors({
   origin: 'http://localhost:5000',
 }));
+app.use(morgan('dev'));
 
 app.group('/api', (router) => {
   apiRouters(router);
