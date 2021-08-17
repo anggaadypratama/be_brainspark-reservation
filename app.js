@@ -8,10 +8,12 @@ const express = require('express');
 const compression = require('compression');
 const path = require('path');
 const cors = require('cors');
+const morgan = require('morgan');
 
 const app = express();
 const apiRouters = require('@routes');
 const middleware = require('@middleware');
+const auth = require('@middleware/auth');
 
 const port = process.env.PORT || 3000;
 
@@ -25,15 +27,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors({
   origin: 'http://localhost:5000',
 }));
+app.use(morgan('dev'));
 
 app.group('/api', (router) => {
   apiRouters(router);
-  router.get('/', ((req, res) => {
+  router.get('/', auth, ((req, res) => {
     res.sendSuccess({
       message: {
         name: 'brainspark reservation',
       },
     });
+
+    res.sendError({ status: 403, message: 'not authenticated' });
   }));
 });
 

@@ -1,6 +1,7 @@
 const message = require('@utils/messages');
 const path = require('path');
 const fs = require('fs');
+const moment = require('moment');
 const DashboardEventModel = require('./model');
 
 const validationId = new RegExp('^[0-9a-fA-F]{24}$');
@@ -15,14 +16,9 @@ module.exports = {
 
     let {
       isOnlyTelkom,
-      note,
-      description,
       ticketLimit,
       ...stringData
     } = req.body;
-
-    description = description && JSON.parse(description);
-    note = note ? JSON.parse(note) : {};
 
     isOnlyTelkom = isOnlyTelkom && JSON.parse(isOnlyTelkom)?.isOnlyTelkom;
     ticketLimit = ticketLimit && Number(ticketLimit);
@@ -32,8 +28,6 @@ module.exports = {
       isFinished: false,
       registrationClosed: false,
       isOnlyTelkom,
-      note,
-      description,
       ticketLimit,
       imagePoster,
     });
@@ -51,49 +45,101 @@ module.exports = {
   getAllEvent: async (req, res) => {
     const isDone = Number(req.query.isFinished) || 0;
 
-    const isRegistrationClosed = await DashboardEventModel.updateMany({
-      $or: [{
-        ticketLimit: {
-          $eq: 100, // expected document from database check equality
-        },
-      }, {
-        endRegistration: {
-          $lte: new Date(),
-        },
-      }],
-    }, {
-      registrationClosed: true,
-    }).catch((errors) => errors && res.sendError(errors));
-
-    const isFinishedUpdate = await DashboardEventModel.updateMany({
-      eventEnd: {
-        $lt: new Date(),
-      },
-    }, {
-      isFinished: true,
-    }).catch((errors) => errors && res.sendError(errors));
-
-    console.log({ isFinishedUpdate, isRegistrationClosed });
-
-    let data = await DashboardEventModel.find()
+    const data = await DashboardEventModel.find()
       .catch((errors) => errors && res.sendError({ status: 500, errors }));
 
-    data = data.map(({
-      _id, themeName, imagePoster, date, eventStart, isFinished, location,
-    }) => ({
-      _id, themeName, imagePoster, date, eventStart, isFinished, location,
-    }));
+    const dataFiltered = data.map(({
+      _id, themeName, imagePoster, date, eventStart, location, eventEnd,
+    }) => {
+      const isEventDone = moment(eventEnd).format() < moment().format();
+
+      return ({
+        _id, themeName, imagePoster, date, eventStart, isEventDone, location, eventEnd,
+      });
+    });
 
     switch (isDone) {
       case 0:
         return res.sendSuccess({
           status: 200,
-          data,
+          data: dataFiltered,
         });
       case 1:
         return res.sendSuccess({
           status: 200,
-          data: data.filter(({ isFinished }) => isFinished),
+          data: dataFiltered.filter(({ isEventDone }) => isEventDone),
+        });
+      case 2:
+        return res.sendSuccess({
+          status: 200,
+          data: dataFiltered.filter(({ isEventDone }) => !isEventDone),
+        });
+      default:
+        return res.sendError({
+          status: 404,
+          message: 'filter tidak ada',
+        });
+    }
+  },
+
+  getAllEventProtected: async (req, res) => {
+    const isDone = Number(req.query.isFinished) || 0;
+
+    let data = await DashboardEventModel.find()
+      .catch((errors) => errors && res.sendError({ status: 500, errors }));
+
+    const dataFiltered = data.map(({
+      _id,
+      themeName,
+      description,
+      date,
+      eventStart,
+      eventEnd,
+      speakerName,
+      location,
+      endRegistration,
+      note,
+      isOnlyTelkom,
+      ticketLimit,
+      imagePoster,
+      participant,
+    }) => {
+      const isEventDone = moment(eventEnd).format() < moment().format();
+
+      return {
+        _id,
+        themeName,
+        description,
+        date,
+        eventStart,
+        eventEnd,
+        speakerName,
+        location,
+        endRegistration,
+        note,
+        isOnlyTelkom,
+        ticketLimit,
+        imagePoster,
+        participant,
+        isEventDone,
+      };
+    });
+
+    switch (isDone) {
+      case 0:
+        return res.sendSuccess({
+          status: 200,
+          data: dataFiltered,
+        });
+      case 1:
+        return res.sendSuccess({
+          status: 200,
+          data: dataFiltered.filter(({ isEventDone }) => isEventDone),
+        });
+      case 2:
+        return res.sendSuccess({
+          status: 200,
+          data: dataFiltered.filter(({ isEventDone }) => !isEventDone),
         });
       default:
         return res.sendError({
@@ -124,6 +170,7 @@ module.exports = {
           eventEnd,
           speakerName,
           location,
+          linkLocation,
           endRegistration,
           isFinished,
           registrationClosed,
@@ -131,6 +178,7 @@ module.exports = {
           description,
           ticketLimit,
           imagePoster,
+          participant,
         } = data;
 
         const note = data?.note ?? {};
@@ -149,10 +197,13 @@ module.exports = {
             isFinished,
             registrationClosed,
             isOnlyTelkom,
+            linkLocation,
             ticketLimit,
             imagePoster,
             description,
+            isEventDone: moment(eventEnd).format() < moment().format(),
             note,
+            totalParticipant: participant.length,
           },
         });
       });
@@ -251,9 +302,6 @@ module.exports = {
         ...stringData
       } = req.body;
 
-      const description = desc && JSON.parse(desc);
-      const note = notes && JSON.parse(notes);
-
       const isOnlyTelkom = onlyTelkom && JSON.parse(onlyTelkom)?.isOnlyTelkom;
       const ticketLimit = ticketLim && Number(ticketLim);
 
@@ -266,8 +314,6 @@ module.exports = {
       const data = {
         imagePoster,
         isOnlyTelkom,
-        note,
-        description,
         ticketLimit,
         ...stringData,
       };
