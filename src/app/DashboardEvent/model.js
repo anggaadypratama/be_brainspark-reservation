@@ -63,7 +63,7 @@ const eventSchema = new mongoose.Schema({
     required: true,
   },
   participant: [{
-    namae: {
+    name: {
       type: String,
       required: true,
     },
@@ -87,7 +87,7 @@ const eventSchema = new mongoose.Schema({
       type: String,
     },
     isAbsen: {
-      type: String,
+      type: Boolean,
       default: false,
     },
     feedback: {

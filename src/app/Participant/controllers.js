@@ -8,13 +8,8 @@ module.exports = {
     const { id } = req.params;
     const { email } = req.body;
     const info = req.body;
-
-    // kemungkinan method exists mengembalikan obejct atau nilai undefined yang
-    // akan membuat res.error, jd kita coba pke chaining operator (.?)
-
     const emailDB = await DashboardEventModel.exists({ _id: id, 'participant.email': email })
       .catch((err) => console.log(''));
-
     const userDB = await DashboardEventModel.exists({ _id: id }).catch((err) => console.log(''));
 
     if (!validationId.test(id)) {
@@ -22,13 +17,11 @@ module.exports = {
         message: 'id tidak valid',
         status: 404,
       });
-      console.log('emailDBs : ', emailDB);
     } else if (!userDB) {
       res.sendError({
         message: 'event sudah dihapus',
         status: 404,
       });
-      console.log('emailDB : ', emailDB);
     } else if (emailDB) {
       res.sendError({
         message: {
@@ -36,7 +29,6 @@ module.exports = {
         },
         status: 409,
       });
-      console.log('emailDB : ', emailDB);
     } else {
       await DashboardEventModel
         .findByIdAndUpdate(id, { $push: { participant: info } }, { runValidators: true })
@@ -45,40 +37,72 @@ module.exports = {
             res.sendError({ errors });
           }
         });
-      console.log('sateto', emailDB);
-      res.sendSuccess({ message: message.add_data_success, status: 201 });
+      res.sendSuccess({ message: message.add_data_success, status: 200 });
     }
   },
-  absen: async (req, res) => {
-    // jika email tidak ditemukan send error
-    // jika email ditemukan error mati kirim data
-    // berisi id participantnya (_id:id,
-    // 'participant._id': idp, nama
-
-    // + field isAbsen (boolean),def.val(false)
-    // , feedback (string) = DashboardEventModel
-    // default value di model participant field isAbsen
-
+  validation: async (req, res) => {
     const { id } = req.params;
-    const { email, namae, feedback } = req.body;
-    const emailDB = await DashboardEventModel.exists({ _id: id, 'participant.email': email }).catch((err) => console.log(''));
+    const { email } = req.body;
+    const emailDB = await DashboardEventModel.exists({ _id: id, 'participant.email': email })
+      .catch((err) => console.log(''));
     if (emailDB) {
-      const datauser = await DashboardEventModel.find({ _id: id, 'participant.email': email });
-      // setelah email ditemukan dan user mengirim feedback ..
-      // get id sama nama u/ dikirim lewat respon
-      // update isAbsen dan feedback dengan method model.update()
+      const idp = await DashboardEventModel
+        .find({ _id: id }, { participant: { $elemMatch: { email } } });
+
       res.sendSuccess({
         message: {
-          email: message.email_exists,
-          id: [DashboardEventModel],
-          namae: datauser,
+          email: message.email_found,
+          nama: idp[0].participant[0].name,
+          idp: idp[0].participant[0].id,
         },
-        status: 409,
+        status: 200,
       });
     } else {
       res.sendError({
         message: {
-          email: 'hmm email anda tidak ditemukan',
+          email: 'alamat email anda tidak ditemukan',
+        },
+        status: 409,
+      });
+      console.log(emailDB);
+    }
+  },
+  absen: async (req, res) => {
+    const { id } = req.params;
+    const { email, feedback } = req.body;
+    const emailDB = await DashboardEventModel.exists({ _id: id, 'participant.email': email })
+      .catch((err) => console.log(''));
+
+    if (emailDB) {
+      const datap = await DashboardEventModel.find({ _id: id },
+        { participant: { $elemMatch: { email } } });
+
+      const idp = datap[0].participant[0].id;
+      const isAbsen = true;
+      const updatedata = await DashboardEventModel
+        .findOneAndUpdate({ _id: id, 'participant._id': idp },
+          { 'participant.$.isAbsen': isAbsen, 'participant.$.feedback': feedback })
+        .catch((errors) => {
+          if (errors) {
+            res.sendError({ errors });
+          }
+        });
+      console.log('idp: ', datap[0].participant[0].id);
+      console.log('updatedata: ', updatedata);
+
+      res.sendSuccess({
+        message: {
+          email: message.email_found,
+          namae: datap[0].participant[0].name,
+          idp: datap[0].participant[0].id,
+        },
+        status: 200,
+
+      });
+    } else {
+      res.sendError({
+        message: {
+          email: 'alamat email anda tidak ditemukan',
         },
         status: 409,
       });
