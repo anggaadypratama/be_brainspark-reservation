@@ -64,7 +64,6 @@ module.exports = {
         },
         status: 409,
       });
-      console.log(emailDB);
     }
   },
   absen: async (req, res) => {
@@ -87,9 +86,6 @@ module.exports = {
             res.sendError({ errors });
           }
         });
-      console.log('idp: ', datap[0].participant[0].id);
-      console.log('updatedata: ', updatedata);
-
       res.sendSuccess({
         message: {
           email: message.email_found,
@@ -97,7 +93,6 @@ module.exports = {
           idp: datap[0].participant[0].id,
         },
         status: 200,
-
       });
     } else {
       res.sendError({
