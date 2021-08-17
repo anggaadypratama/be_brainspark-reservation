@@ -53,6 +53,11 @@ const eventSchema = new mongoose.Schema({
   note: {
     type: String,
   },
+  isAbsentActive: {
+    type: Boolean,
+    default: false,
+    required: true,
+  },
   // processed in server
   isFinished: {
     type: Boolean,
@@ -93,7 +98,6 @@ const eventSchema = new mongoose.Schema({
     feedback: {
       type: String,
     },
-
   }],
 });
 
