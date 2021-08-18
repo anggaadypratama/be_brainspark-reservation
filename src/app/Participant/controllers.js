@@ -2,6 +2,7 @@ const message = require('@utils/messages');
 
 const validationId = new RegExp('^[0-9a-fA-F]{24}$');
 const DashboardEventModel = require('../DashboardEvent/model');
+const mail = require('../Mailer/controllers');
 
 module.exports = {
   inputPart: async (req, res) => {
@@ -94,6 +95,7 @@ module.exports = {
         },
         status: 200,
       });
+      mail.sendMail();
     } else {
       res.sendError({
         message: {
