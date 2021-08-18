@@ -41,6 +41,7 @@ module.exports = {
       res.sendSuccess({ message: message.add_data_success, status: 200 });
     }
   },
+
   validation: async (req, res) => {
     const { id } = req.params;
     const { email } = req.body;
@@ -67,6 +68,7 @@ module.exports = {
       });
     }
   },
+
   absen: async (req, res) => {
     const { id } = req.params;
     const { email, feedback } = req.body;

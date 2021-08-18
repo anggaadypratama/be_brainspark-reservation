@@ -150,20 +150,20 @@ module.exports = {
   },
 
   getEventById: async (req, res) => {
-    const { id } = req.params;
+    const { id: idEvent } = req.params;
 
-    if (!validationId.test(id)) {
+    if (!validationId.test(idEvent)) {
       res.sendError({
         message: 'id tidak ditemukan',
         status: 404,
       });
     } else {
-      await DashboardEventModel.findById(id, (errors, data) => {
+      await DashboardEventModel.findById(idEvent, (errors, data) => {
         if (errors) return res.sendError({ status: 500, errors });
         if (!data) return res.sendError({ status: 404, message: message.data_notfound });
 
         const {
-          _id,
+          _id: id,
           themeName,
           date,
           eventStart,
@@ -186,7 +186,7 @@ module.exports = {
         return res.sendSuccess({
           status: 200,
           data: {
-            _id,
+            id,
             themeName,
             date,
             eventStart,
