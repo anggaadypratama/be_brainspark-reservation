@@ -179,6 +179,7 @@ module.exports = {
           ticketLimit,
           imagePoster,
           participant,
+          isAbsentActive,
         } = data;
 
         const note = data?.note ?? {};
@@ -204,6 +205,7 @@ module.exports = {
             isEventDone: moment(eventEnd).format() < moment().format(),
             note,
             totalParticipant: participant.length,
+            isAbsentActive,
           },
         });
       });
