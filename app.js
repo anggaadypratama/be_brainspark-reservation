@@ -18,15 +18,15 @@ const auth = require('@middleware/auth');
 const port = process.env.PORT || 3000;
 
 // middleware
+app.use(cors({
+  origin: '*',
+}));
 app.use(middleware);
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(compression());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors({
-  origin: '*',
-}));
+
 app.use(morgan('dev'));
 
 app.group('/api', (router) => {
