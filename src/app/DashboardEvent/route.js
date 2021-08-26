@@ -7,7 +7,7 @@ module.exports = (app) => {
   app.patch('/event/:id/', [auth, uploadFile], dashboardEventController.editEventById);
   app.delete('/event/:id/', auth, dashboardEventController.deleteEventById);
   app.get('/event/dashboard/', auth, dashboardEventController.getAllEventProtected);
-  app.get('/event/dashboard/:id/', auth, dashboardEventController.getEventById);
+  app.get('/event/dashboard/:id/', auth, dashboardEventController.getEventByIdProtected);
   app.get('/event/', dashboardEventController.getAllEvent);
   app.get('/event/:id/', dashboardEventController.getEventById);
 };
