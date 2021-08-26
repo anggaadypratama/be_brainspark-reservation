@@ -1,18 +1,28 @@
 const message = require('@utils/messages');
-const path = require('path');
-const fs = require('fs');
+const stream = require('stream');
 const moment = require('moment');
+const drive = require('@root/src/utils/helpers/driveApis');
 const DashboardEventModel = require('./model');
 
 const validationId = new RegExp('^[0-9a-fA-F]{24}$');
 
 module.exports = {
   createEventPost: async (req, res) => {
-    if (!req.file?.path) {
+    if (!req.file) {
       res.sendError({ message: message.upload_image_problem, status: 422 });
     }
 
-    const imagePoster = req?.file?.path.replace('public/', '');
+    const fileObject = req.file;
+    let bufferStream = new stream.PassThrough();
+    bufferStream.end(fileObject.buffer);
+
+    const { id: imageId } = await drive.upload(bufferStream, fileObject)
+      .catch((errors) => res.sendError({ errors }));
+
+    const { webViewLink } = await drive.get(imageId)
+      .catch((errors) => res.sendError({ errors }));
+    const getImageId = webViewLink.split('/');
+    const imagePoster = `https://drive.google.com/uc?id=${getImageId[getImageId.length - 2]}`;
 
     let {
       isOnlyTelkom,
@@ -30,6 +40,7 @@ module.exports = {
       isOnlyTelkom,
       ticketLimit,
       imagePoster,
+      imageId,
     });
 
     await DashboardEvent.save((errors) => {
@@ -48,15 +59,14 @@ module.exports = {
     const data = await DashboardEventModel.find()
       .catch((errors) => errors && res.sendError({ status: 500, errors }));
 
-    const dataFiltered = data.map(({
+    const dataFiltered = await Promise.all(data?.map(async ({
       _id, themeName, imagePoster, date, eventStart, location, eventEnd,
     }) => {
       const isEventDone = moment(eventEnd).format() < moment().format();
-
       return ({
         _id, themeName, imagePoster, date, eventStart, isEventDone, location, eventEnd,
       });
-    });
+    }));
 
     switch (isDone) {
       case 0:
@@ -88,7 +98,7 @@ module.exports = {
     let data = await DashboardEventModel.find()
       .catch((errors) => errors && res.sendError({ status: 500, errors }));
 
-    const dataFiltered = data.map(({
+    const dataFiltered = await Promise.all(data.map(async ({
       _id,
       themeName,
       description,
@@ -123,7 +133,7 @@ module.exports = {
         participant,
         isEventDone,
       };
-    });
+    }));
 
     switch (isDone) {
       case 0:
@@ -178,6 +188,7 @@ module.exports = {
           description,
           ticketLimit,
           imagePoster,
+          imageId,
           participant,
           isAbsentActive,
         } = data;
@@ -201,6 +212,72 @@ module.exports = {
             linkLocation,
             ticketLimit,
             imagePoster,
+            imageId,
+            description,
+            isEventDone: moment(eventEnd).format() < moment().format(),
+            note,
+            totalParticipant: participant.length,
+            isAbsentActive,
+          },
+        });
+      });
+    }
+  },
+
+  getEventByIdProtected: async (req, res) => {
+    const { id: idEvent } = req.params;
+
+    if (!validationId.test(idEvent)) {
+      res.sendError({
+        message: 'id tidak ditemukan',
+        status: 404,
+      });
+    } else {
+      await DashboardEventModel.findById(idEvent, (errors, data) => {
+        if (errors) return res.sendError({ status: 500, errors });
+        if (!data) return res.sendError({ status: 404, message: message.data_notfound });
+
+        const {
+          _id: id,
+          themeName,
+          date,
+          eventStart,
+          eventEnd,
+          speakerName,
+          location,
+          linkLocation,
+          endRegistration,
+          isFinished,
+          registrationClosed,
+          isOnlyTelkom,
+          description,
+          ticketLimit,
+          imagePoster,
+          imageId,
+          participant,
+          isAbsentActive,
+        } = data;
+
+        const note = data?.note ?? {};
+
+        return res.sendSuccess({
+          status: 200,
+          data: {
+            id,
+            themeName,
+            date,
+            eventStart,
+            eventEnd,
+            speakerName,
+            location,
+            endRegistration,
+            isFinished,
+            registrationClosed,
+            isOnlyTelkom,
+            linkLocation,
+            ticketLimit,
+            imagePoster,
+            imageId,
             description,
             isEventDone: moment(eventEnd).format() < moment().format(),
             note,
@@ -221,16 +298,10 @@ module.exports = {
         status: 404,
       });
     } else {
-      const removeImage = (file) => {
+      const removeImage = async (imgId) => {
         try {
-          if (file) {
-            const filePath = path.join(__dirname, '../../../public', file);
-            fs.unlink(filePath, (errors) => {
-              if (errors) {
-                res.sendError({ message: message.failed_remove.image, status: 500 });
-              }
-            });
-          }
+          await drive.delete(imgId)
+            .catch((errors) => res.sendError(errors));
         } catch (errors) {
           res.sendError({ message: 'gambar tidak ada', errors, status: 500 });
         }
@@ -241,7 +312,7 @@ module.exports = {
           res.sendError({ message: message.data_notfound, status: 404 });
         } else {
           if (data) {
-            removeImage(data?.imagePoster);
+            removeImage(data?.imageId);
           }
 
           await DashboardEventModel.findByIdAndRemove(id, (error, docs) => {
@@ -272,29 +343,32 @@ module.exports = {
         status: 404,
       });
     } else {
-      if (!req.file?.path) {
+      if (!req.file) {
         res.sendError({ message: message.upload_image_problem, status: 422 });
       }
 
-      const poster = req?.file?.path.replace('public/', '');
+      const removeImage = async (imgId) => {
+        await drive.delete(imgId)
+          .catch((errors) => res.sendError({ message: 'gambar tidak ada', errors, status: 500 }));
+      };
+
+      const databasePoster = await DashboardEventModel.findById(id);
+
+      await removeImage(databasePoster?.imageId);
+
+      const fileObject = req.file;
+      let bufferStream = new stream.PassThrough();
+      bufferStream.end(fileObject.buffer);
+
+      const { id: imageId } = await drive.upload(bufferStream, fileObject)
+        .catch((errors) => res.sendError({ errors }));
+
+      const { webViewLink } = await drive.get(imageId)
+        .catch((errors) => res.sendError({ errors }));
+      const getImageId = webViewLink.split('/');
+      const imagePoster = `https://drive.google.com/uc?id=${getImageId[getImageId.length - 2]}`;
 
       // eslint-disable-next-line consistent-return
-      const removeImage = (file, newPoster) => {
-        try {
-          if (file) {
-            const filePath = path.join(__dirname, '../../../public', file);
-            fs.unlink(filePath, (errors) => {
-              if (errors) {
-                res.sendError({ message: message.failed_remove.image, status: 500 });
-              }
-            });
-          }
-
-          return newPoster;
-        } catch (errors) {
-          res.sendError({ message: 'gambar tidak ada', errors, status: 500 });
-        }
-      };
 
       let {
         isOnlyTelkom: onlyTelkom,
@@ -307,14 +381,9 @@ module.exports = {
       const isOnlyTelkom = onlyTelkom && JSON.parse(onlyTelkom)?.isOnlyTelkom;
       const ticketLimit = ticketLim && Number(ticketLim);
 
-      const databasePoster = await DashboardEventModel.findById(id);
-
-      const imagePoster = databasePoster?.imagePoster !== poster
-        ? removeImage(databasePoster?.imagePoster, poster)
-        : databasePoster;
-
       const data = {
         imagePoster,
+        imageId,
         isOnlyTelkom,
         ticketLimit,
         ...stringData,

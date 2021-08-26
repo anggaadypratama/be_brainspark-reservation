@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { stringify } = require('uuid');
 // const participantModel = require('../Participant/model');
 
 const eventSchema = new mongoose.Schema({
@@ -8,6 +7,10 @@ const eventSchema = new mongoose.Schema({
     required: true,
   },
   imagePoster: {
+    type: String,
+    required: true,
+  },
+  imageId: {
     type: String,
     required: true,
   },

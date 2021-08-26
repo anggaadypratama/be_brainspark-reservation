@@ -6,17 +6,6 @@ const FILE_TYPE = [
   'image/jpeg',
 ];
 
-const fileStorage = multer.diskStorage({
-  destination: (req, res, callback) => {
-    callback(null, 'public/images');
-  },
-
-  filename: (req, file, callback) => {
-    callback(null, `${new Date().getTime().toString()}_${file.originalname}`);
-  },
-
-});
-
 const fileFilter = (req, file, callback) => {
   const { mimetype } = file;
 
@@ -28,7 +17,7 @@ const fileFilter = (req, file, callback) => {
 };
 
 module.exports = multer({
-  storage: fileStorage,
+  storage: multer.memoryStorage(),
   fileFilter,
   limit: {
     fileSize: 1000,
