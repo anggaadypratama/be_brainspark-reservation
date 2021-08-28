@@ -1,0 +1,166 @@
+body, html {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  background-color: #F7F7F7;
+}
+
+@media only screen and (max-width: 670px) {
+  body, html {
+    background-color: white;
+  }
+}
+
+a {
+  font-weight: 600;
+  text-decoration: none;
+  -webkit-transition: all ease .3s;
+  transition: all ease .3s;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: orange;
+}
+
+.root {
+  width: 100%;
+  position: relative;
+  overflow-wrap: break-word;
+  background-image: url("cid:Vector5.png");
+}
+
+.root section {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100vh;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.root section .logo-wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin-bottom: 16px;
+}
+
+@media only screen and (max-width: 670px) {
+  .root section .logo-wrapper {
+    margin-bottom: 16px;
+  }
+}
+
+.root section .logo-wrapper .logo-text {
+  overflow-wrap: break-word;
+  font-family: 'raleway', sans-serif;
+  margin-left: 16px;
+}
+
+.root section .logo-wrapper .logo-text h3 {
+  font-size: 18px;
+  line-height: 4px;
+  font-weight: 800;
+}
+
+.root section .logo-wrapper .logo-text p {
+  font-size: 14px;
+  line-height: 4px;
+  font-weight: 600;
+}
+
+.root section .logo-wrapper .logo {
+  height: 40px;
+  width: 40px;
+}
+
+.root section .card-content {
+  margin-top: 21px;
+  background-color: white;
+  -webkit-box-shadow: 0px 0px 20px 2px rgba(0, 0, 0, 0.25);
+          box-shadow: 0px 0px 20px 2px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+
+@media only screen and (max-width: 670px) {
+  .root section .card-content {
+    background-color: transparent;
+    -webkit-box-shadow: none;
+            box-shadow: none;
+    padding: 12px 0px;
+    width: 100%;
+    word-wrap: break-word;
+    margin-top: 0;
+  }
+}
+
+.root section .card-content .content {
+  font-family: 'roboto-condensed', sans-serif;
+  max-width: 600px;
+  line-height: 27px;
+  padding: 21px 32px;
+}
+
+@media only screen and (max-width: 670px) {
+  .root section .card-content .content {
+    padding: 24px;
+    word-wrap: break-word;
+  }
+}
+
+.root section .card-content .content .sign {
+  margin-top: 30px;
+  line-height: 8px;
+}
+
+.root section .card-content .content .table {
+  margin: 16px;
+}
+
+@media only screen and (max-width: 600px) {
+  .root section .card-content .content .table {
+    font-size: 8px;
+  }
+}
+
+.root section .card-content .content .table tr {
+  text-align: left;
+  line-height: 21px;
+}
+
+.root section .card-content .content .table tr td:nth-child(2) {
+  width: 20px;
+  text-align: center;
+}
+
+.root .decoration--right {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  right: 0;
+  width: 30%;
+}
+
+.root .decoration--left {
+  position: absolute;
+  z-index: 0;
+  bottom: 0;
+  left: 0;
+  width: 30%;
+}
+/*# sourceMappingURL=style.css.map */

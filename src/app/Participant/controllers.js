@@ -38,10 +38,13 @@ module.exports = {
             res.sendError({ errors });
           }
         });
+      const idp = await DashboardEventModel
+        .find({ _id: id }, { participant: { $elemMatch: { email } } });
+      // mail.sendMails(id, idp[0].participant[0].id);
+      mail.sendMails();
       res.sendSuccess({ message: message.add_data_success, status: 200 });
     }
   },
-
   validation: async (req, res) => {
     const { id } = req.params;
     const { email } = req.body;
@@ -50,15 +53,18 @@ module.exports = {
     if (emailDB) {
       const idp = await DashboardEventModel
         .find({ _id: id }, { participant: { $elemMatch: { email } } });
-
+      const is = await DashboardEventModel
+        .find({ _id: id }, { ticketLimit: 100 });
       res.sendSuccess({
         message: {
           email: message.email_found,
           nama: idp[0].participant[0].name,
           idp: idp[0].participant[0].id,
+          is,
         },
         status: 200,
       });
+      console.log('is : ', is);
     } else {
       res.sendError({
         message: {
@@ -78,8 +84,6 @@ module.exports = {
     if (emailDB) {
       const datap = await DashboardEventModel.find({ _id: id },
         { participant: { $elemMatch: { email } } });
-
-      const idp = datap[0].participant[0].id;
       const isAbsen = true;
       const updatedata = await DashboardEventModel
         .findOneAndUpdate({ _id: id, 'participant._id': idp },
@@ -97,7 +101,6 @@ module.exports = {
         },
         status: 200,
       });
-      mail.sendMail();
     } else {
       res.sendError({
         message: {

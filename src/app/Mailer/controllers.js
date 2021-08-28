@@ -1,90 +1,114 @@
 const nodemailer = require('nodemailer');
 
-// // async..await is not allowed in global scope, must use a wrapper
-// async function main() {
-//   // Generate test SMTP service account from ethereal.email
-//   // Only needed if you don't have a real mail account for testing
-//   let testAccount = await nodemailer.createTestAccount();
+const { stringify } = require('uuid');
 
-//   // create reusable transporter object using the default SMTP transport
-//   let transporter = nodemailer.createTransport({
-//     host: 'smtp.ethereal.email',
-//     port: 587,
-//     secure: false, // true for 465, false for other ports
-//     auth: {
-//       user: testAccount.user, // generated ethereal user
-//       pass: testAccount.pass, // generated ethereal password
-//     },
-//   });
+const handlebars = require('handlebars');
+const fs = require('fs');
+let smtpTransport = require('nodemailer-smtp-transport');
+const path = require('path');
 
-//   // send mail with defined transport object
-//   let info = await transporter.sendMail({
-//     from: '"Fred Foo 👻" <foo@example.com>', // sender address
-//     to: 'bar@example.com, baz@example.com', // list of receivers
-//     subject: 'Hello ✔', // Subject line
-//     text: 'Hello world?', // plain text body
-//     html: '<b>Hello world?</b>', // html body
-//   });
+const moment = require('moment');
 
-//   console.log('Message sent: %s', info.messageId);
-//   // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-
-//   // Preview only available when sending through an Ethereal account
-//   console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-//   // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-// }
-
-// main().catch(console.error);
-
+const { timeStamp } = require('console');
+const DashboardEventModel = require('../DashboardEvent/model');
 require('dotenv').config();
 
-// const nodemailer = require('nodemailer');
-
-// let transporter = nodemailer.createTransport({
-//   service: 'gmail',
-//   auth:{
-//     user: process.env.EMAIL,
-//     pass: process.env.PASSWORD
-//   }
-// })
-
-// let mailOptions = {
-//   from: 'rplgdcLab@gmail.com',
-//   to: 'muhammadrizqia@student.telkomuniversity.ac.id',
-//   subject: 'Testing email participant brainspark tehe~',
-//   text: 'ITs works?'
-// }
-
-// transporter.sendMail(mailOptions, function(err,data){
-//   if (err) {
-//     console.log('Error Occurs: ', err);
-//   }else{
-//     console.log('Email sent!!!');
-//   }
-// })
 module.exports = {
-  sendMail: async (req, res) => {
-    let transporter = nodemailer.createTransport({
+  sendMails: async () => {
+    const emailTemplateSource = fs.readFileSync(path.join(__dirname, '/brainspark-email/index.hbs'), 'utf8');
+    const template = handlebars.compile(emailTemplateSource);
+    // const htmlToSend = template({ message: 'Hello World!' });
+    const htmlToSend = template({
+      name: 'name',
+      // date: 'date',
+      // time: 'time',
+      // link: 'link',
+      // location: 'location',
+    });
+
+    let smtpTransports = nodemailer.createTransport(smtpTransport({
       service: 'gmail',
       auth: {
         user: process.env.EMAIL,
         pass: process.env.PASSWORD,
       },
-    });
+    }));
+    // const event = await DashboardEventModel.find({ _id: ide });
+    // const part = await DashboardEventModel
+    //   .find({ _id: ide }, { participant: { $elemMatch: { _id: idp } } });
+    // const names = part[0].participant[0].name;
+    // const time = moment(event[0].date).format('HH:m:s A');
+    // const loc = event[0].linkLocation;
+    // const eventStarts = moment(event[0].date).format('dddd, MMMM YYYY');
 
-    let mailOptions = {
+    // let readHTMLFile = (path, callback) => {
+    //   fs.readFile(path, { encoding: 'utf-8' }, (err, html) => {
+    //     if (err) {
+    //       throw err;
+    //       // console.log(err);
+    //       callback(err);
+    //     } else {
+    //       callback(null, html);
+    //     }
+    //   });
+    // };
+
+    const mailOptions = {
       from: 'rplgdcLab@gmail.com',
       to: 'muhammadrizqia@student.telkomuniversity.ac.id',
-      subject: 'Testing email participant brainspark tehe~',
-      text: 'ITs works?',
+      subject: 'well',
+      html: htmlToSend,
+      attachments: [
+        {
+          filename: 'icon.webp',
+          path: path.join(__dirname, '/brainspark-email/images/icon.webp'),
+          cid: 'icon.webp',
+        },
+        {
+          filename: 'Vector5.png',
+          path: path.join(__dirname, '/brainspark-email/images/Vector5.png'),
+          cid: 'Vector5.png',
+        },
+        {
+          filename: 'Vector6.png',
+          path: path.join(__dirname, '/brainspark-email/images/Vector6.png'),
+          cid: 'Vector6.png',
+        },
+      ],
     };
 
-    transporter.sendMail(mailOptions, (err, data) => {
+    smtpTransports.sendMail(mailOptions, (err, response) => {
       if (err) {
         console.log('Error Occurs: ', err);
       } else {
         console.log('Email sent!!!');
       }
     });
+
+    // readHTMLFile(`${__dirname}app/public/pages/emailWithPDF.html`, (err, html) => {
+    // { D:\2020_2021\RPLGDC\BE\BE-BRAINSPARK-RESERVATION\src\app\Mailer\brainspark-email\index.html
+    // readHTMLFile(`${__dirname}/brainspark-email/index.hbs`, (err, html) => {
+    //   let template = handlebars.compile(html);
+    //   let replacements = {
+    //     name: names,
+    //     date: eventStarts,
+    //     time,
+    //     location: loc,
+    //   };
+    //   let htmlToSend = template(replacements);
+    //   let mailOptions = {
+    //     from: 'rplgdcLab@gmail.com',
+    //     to: 'muhammadrizqia@student.telkomuniversity.ac.id',
+    //     subject: 'brainsparks',
+    //     html: htmlToSend,
+    //   };
+    //   smtpTransport.sendMail(mailOptions, (error, response) => {
+    //     if (err) {
+    //       console.log('Error Occurs: ', err);
+    //     } else {
+    //       console.log('Email sent!!!');
+    //     }
+    //   });
+    // });
   },
 };
