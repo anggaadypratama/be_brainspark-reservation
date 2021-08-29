@@ -38,8 +38,6 @@ app.group('/api', (router) => {
         name: 'brainspark reservation',
       },
     });
-
-    res.sendError({ status: 403, message: 'not authenticated' });
   }));
 });
 
