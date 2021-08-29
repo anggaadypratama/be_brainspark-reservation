@@ -1,8 +1,8 @@
 const message = require('@utils/messages');
 
 const validationId = new RegExp('^[0-9a-fA-F]{24}$');
+const mail = require('@utils/helpers/mail');
 const DashboardEventModel = require('../DashboardEvent/model');
-const mail = require('../Mailer/controllers');
 
 module.exports = {
   inputPart: async (req, res) => {
@@ -40,11 +40,37 @@ module.exports = {
         });
       const idp = await DashboardEventModel
         .find({ _id: id }, { participant: { $elemMatch: { email } } });
+
+      const dataEmail = await DashboardEventModel.findById(id);
+
+      const {
+        speakerName,
+        themeName,
+        location,
+        date,
+        eventStart,
+        isLinkLocation,
+        linkLocation,
+      } = dataEmail;
+
+      const sendData = {
+        speakerName,
+        themeName,
+        location,
+        date,
+        eventStart,
+        isLinkLocation,
+        linkLocation,
+        name: req.body?.name,
+        email,
+      };
+
       // mail.sendMails(id, idp[0].participant[0].id);
-      mail.sendMails();
+      mail.send(sendData);
       res.sendSuccess({ message: message.add_data_success, status: 200 });
     }
   },
+
   validation: async (req, res) => {
     const { id } = req.params;
     const { email } = req.query;

@@ -38,12 +38,17 @@ const eventSchema = new mongoose.Schema({
     type: Boolean,
     required: true,
   },
+  isLinkLocation: {
+    type: Boolean,
+    required: true,
+  },
   location: {
     type: String,
     required: true,
   },
   linkLocation: {
     type: String,
+    default: null,
   },
   endRegistration: {
     type: Date,

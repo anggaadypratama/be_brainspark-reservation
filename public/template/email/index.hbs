@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./style.css">
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&family=Roboto+Condensed:wght@400;700&display=swap");
+html {
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+body {
+  background: linear-gradient(68.21deg, #FC6D21 12.88%, #EE3B52 74.92%, #DD2476 98.79%);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  height: 100%;
+}
+
+p {
+  line-height: 12px;
+}
+
+a{
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover{
+  text-decoration: underline;
+}
+
+.card {
+  font-family: 'Raleway', sans-serif;
+  background-color: white;
+  max-width: 600px;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+}
+
+@media only screen and (max-width: 600px) {
+  .card {
+    padding: 1rem 1rem;
+  }
+}
+
+.card .logo {
+  width: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  line-height: 8px;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.card .logo__title {
+  margin-left: 1rem;
+}
+
+.card .logo__title h3 {
+  font-weight: 800;
+}
+
+.card .logo--content {
+  margin: 2rem 0;
+}
+
+section {
+  margin: 3rem 0;
+  font-family: 'Roboto Condensed', sans-serif;
+  text-align: center;
+}
+
+section .detail {
+  background-color: #f7f7f7;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 2rem 1rem;
+}
+
+section .detail tr {
+  text-align: left;
+  line-height: 21px;
+}
+
+section .detail tr td:nth-child(2) {
+  width: 20px;
+  text-align: center;
+}
+
+section .sign {
+  margin-top: 3rem;
+  line-height: 8px;
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="logo--content">
+        <div class="logo">
+          <img loading="lazy" src="cid:icon.jpg" style="width:45px; height: 45px;" alt="log">
+          <div class="logo__title">
+            <h3>RPL-GDC</h3>
+            <p>Brainspark</p>
+          </div>
+        </div>
+      </div>
+
+      <section>
+        <h3>Halo {{name}}</h3>
+        <p>Terima kasih telah medaftar brainspark dengan tema <b>{{themeName}}</b> oleh <b>{{speakerName}}</b></p>
+        <p>kamu dapat menghadiri acara ini pada:</p>
+
+
+        <div class="detail">
+          <table>
+            <tr>
+                <th>Tanggal</th>
+                <td>:</td>
+                <td>{{date}}</td>
+            </tr>
+            <tr>
+                <th>Jam</th>
+                <td>:</td>
+                <td>{{eventStart}}</td>
+            </tr>
+            <tr>
+                <th>Lokasi</th>
+                <td>:</td>
+                <td>
+                  {{#if isLinkLocation}}
+                    <a href={{linkLocation}}>{{location}} (LINK)</a>
+                  {{else}}
+                    {{location}}
+                  {{/if}}
+                </td>
+            </tr>
+        </table>
+        </div>
+
+      <p>Kami harap kamu dapat menghadiri acara ini dan mendapat pengalaman berharga.</p>
+
+      <div class="sign">
+          <h4>Terimakasih</h4>
+          <p>RPL-GDC Laboratory</p>
+      </div>
+      </section>
+
+    </div>
+  </body>
+</html>

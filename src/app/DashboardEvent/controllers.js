@@ -256,6 +256,7 @@ module.exports = {
           imageId,
           participant,
           isAbsentActive,
+          isLinkLocation,
         } = data;
 
         const note = data?.note ?? {};
@@ -283,6 +284,7 @@ module.exports = {
             note,
             totalParticipant: participant.length,
             isAbsentActive,
+            isLinkLocation,
           },
         });
       });
