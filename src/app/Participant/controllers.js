@@ -118,8 +118,6 @@ module.exports = {
         const datap = await DashboardEventModel.find({ _id: id },
           { participant: { $elemMatch: { email } } });
 
-        console.log(datap[0]?.participant[0]?.isAbsen);
-
         if (!(datap[0]?.participant[0]?.isAbsen)) {
           const idp = datap[0].participant[0].id;
           const isAbsen = true;
