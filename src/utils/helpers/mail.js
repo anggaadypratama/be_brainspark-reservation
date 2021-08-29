@@ -20,8 +20,6 @@ const mail = {
       extName: '.hbs',
     };
 
-    console.log(data);
-
     const {
       date,
       eventStart,
