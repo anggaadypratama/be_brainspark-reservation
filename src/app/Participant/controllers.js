@@ -1,6 +1,7 @@
 const message = require('@utils/messages');
 
 const validationId = new RegExp('^[0-9a-fA-F]{24}$');
+const mail = require('@utils/helpers/mail');
 const DashboardEventModel = require('../DashboardEvent/model');
 
 module.exports = {
@@ -37,6 +38,35 @@ module.exports = {
             res.sendError({ errors });
           }
         });
+      const idp = await DashboardEventModel
+        .find({ _id: id }, { participant: { $elemMatch: { email } } });
+
+      const dataEmail = await DashboardEventModel.findById(id);
+
+      const {
+        speakerName,
+        themeName,
+        location,
+        date,
+        eventStart,
+        isLinkLocation,
+        linkLocation,
+      } = dataEmail;
+
+      const sendData = {
+        speakerName,
+        themeName,
+        location,
+        date,
+        eventStart,
+        isLinkLocation,
+        linkLocation,
+        name: req.body?.name,
+        email,
+      };
+
+      // mail.sendMails(id, idp[0].participant[0].id);
+      mail.send(sendData);
       res.sendSuccess({ message: message.add_data_success, status: 200 });
     }
   },
@@ -49,15 +79,18 @@ module.exports = {
     if (emailDB) {
       const idp = await DashboardEventModel
         .find({ _id: id }, { participant: { $elemMatch: { email } } });
-
+      const is = await DashboardEventModel
+        .find({ _id: id }, { ticketLimit: 100 });
       res.sendSuccess({
         message: {
           email: message.email_found,
           nama: idp[0].participant[0].name,
           idp: idp[0].participant[0].id,
+          is,
         },
         status: 200,
       });
+      console.log('is : ', is);
     } else {
       res.sendError({
         message: {
@@ -84,8 +117,6 @@ module.exports = {
       if (emailDB) {
         const datap = await DashboardEventModel.find({ _id: id },
           { participant: { $elemMatch: { email } } });
-
-        console.log(datap[0]?.participant[0]?.isAbsen);
 
         if (!(datap[0]?.participant[0]?.isAbsen)) {
           const idp = datap[0].participant[0].id;
