@@ -212,11 +212,25 @@
                                     <th>Lokasi</th>
                                     <td>:</td>
                                     <td>
-                                        {{!-- {{#pf:if linkLocation.length ">" "1"}}
+                                        {{!-- <script>
+                                            handlebars.registerHelper('ifCond', function(v1, v2, options) {
+                                                if(v1 < v2) {
+                                                    return options.fn(this);
+                                                }
+                                                return options.inverse(this);
+                                            });
+                                        </script> --}}
+                                        {{!-- {{#pf:ifCond location 2 }}
+                                            <a href={{location}}</a>
+                                        {{else}}
+                                            <p>location > 2</p> 
+                                        {{/pf:ifCond}} --}}
+                                        {{#pf:if linklength ">" "1"}}
                                             <a href={{link}}>{{location}}</a>
                                         {{else}}
                                             <p>{{location}}</p>
-                                        {{/pf:if}}  --}}
+                                        {{/pf:if}} 
+                                        
                                     </td>
                                 </tr>
                             </table>

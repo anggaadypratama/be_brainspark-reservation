@@ -14,14 +14,36 @@ const DashboardEventModel = require('../DashboardEvent/model');
 require('dotenv').config();
 
 module.exports = {
-  sendMails: async () => {
+  sendMails: async (ide, idp) => {
     const emailTemplateSource = fs.readFileSync(path.join(__dirname, '/brainspark-email/index.hbs'), 'utf8');
     const template = handlebars.compile(emailTemplateSource);
     // const htmlToSend = template({ message: 'Hello World!' });
+    const event = await DashboardEventModel.find({ _id: ide });
+    const part = await DashboardEventModel
+      .find({ _id: ide }, { participant: { $elemMatch: { _id: idp } } });
+    const names = part[0].participant[0].name;
+    const eventTheme = event[0].themeName;
+    const speaker = event[0].speakerName;
+    const date = moment(event[0].date).format('dddd, MMMM YYYY');
+    const time = moment(event[0].date).format('HH:m:s A');
+    const lLoc = event[0].linkLocation;
+    const loc = event[0].location;
+
+    handlebars.registerHelper('ifCond', function(v1, v2, options) {
+      if(v1 < v2) {
+        return options.fn(this);
+      }
+      return options.inverse(this);
+    });
+
     const htmlToSend = template({
-      name: 'name',
-      // date: 'date',
-      // time: 'time',
+      name: names,
+      eventTheme,
+      speaker,
+      date,
+      time,
+      linlinkLocation: lLoc,
+      location: loc,
       // link: 'link',
       // location: 'location',
     });

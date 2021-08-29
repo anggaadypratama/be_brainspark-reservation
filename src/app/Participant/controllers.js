@@ -40,8 +40,8 @@ module.exports = {
         });
       const idp = await DashboardEventModel
         .find({ _id: id }, { participant: { $elemMatch: { email } } });
-      // mail.sendMails(id, idp[0].participant[0].id);
-      mail.sendMails();
+      mail.sendMails(id, idp[0].participant[0].id);
+      // mail.sendMails();
       res.sendSuccess({ message: message.add_data_success, status: 200 });
     }
   },
