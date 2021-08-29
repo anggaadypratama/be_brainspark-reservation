@@ -16,12 +16,12 @@ module.exports = {
     if (!validationId.test(id)) {
       res.sendError({
         message: 'id tidak valid',
-        status: 404,
+        status: 400,
       });
     } else if (!userDB) {
       res.sendError({
         message: 'event sudah dihapus',
-        status: 404,
+        status: 400,
       });
     } else if (emailDB) {
       res.sendError({
@@ -47,7 +47,7 @@ module.exports = {
   },
   validation: async (req, res) => {
     const { id } = req.params;
-    const { email } = req.body;
+    const { email } = req.query;
     const emailDB = await DashboardEventModel.exists({ _id: id, 'participant.email': email })
       .catch((err) => console.log(''));
     if (emailDB) {
@@ -70,7 +70,7 @@ module.exports = {
         message: {
           email: 'alamat email anda tidak ditemukan',
         },
-        status: 409,
+        status: 404,
       });
     }
   },
@@ -78,35 +78,61 @@ module.exports = {
   absen: async (req, res) => {
     const { id } = req.params;
     const { email, feedback } = req.body;
-    const emailDB = await DashboardEventModel.exists({ _id: id, 'participant.email': email })
-      .catch((err) => console.log(''));
 
-    if (emailDB) {
-      const datap = await DashboardEventModel.find({ _id: id },
-        { participant: { $elemMatch: { email } } });
-      const isAbsen = true;
-      const updatedata = await DashboardEventModel
-        .findOneAndUpdate({ _id: id, 'participant._id': idp },
-          { 'participant.$.isAbsen': isAbsen, 'participant.$.feedback': feedback })
-        .catch((errors) => {
-          if (errors) {
-            res.sendError({ errors });
-          }
+    const dataEvent = await DashboardEventModel.findById(id)
+      .catch((err) => err && res.sendError({
+        message: 'Id Tidak ditemukan',
+      }));
+
+    if (dataEvent?.isAbsentActive) {
+      const emailDB = await DashboardEventModel.exists({ _id: id, 'participant.email': email })
+        .catch((err) => console.log(''));
+
+      if (emailDB) {
+        const datap = await DashboardEventModel.find({ _id: id },
+          { participant: { $elemMatch: { email } } });
+
+        console.log(datap[0]?.participant[0]?.isAbsen);
+
+        if (!(datap[0]?.participant[0]?.isAbsen)) {
+          const idp = datap[0].participant[0].id;
+          const isAbsen = true;
+          await DashboardEventModel
+            .findOneAndUpdate({ _id: id, 'participant._id': idp },
+              { 'participant.$.isAbsen': isAbsen, 'participant.$.feedback': feedback })
+            .catch((errors) => {
+              if (errors) {
+                res.sendError({ errors });
+              }
+            });
+          res.sendSuccess({
+            message: {
+              email: message.email_found,
+              namae: datap[0].participant[0].name,
+              idp: datap[0].participant[0].id,
+            },
+            status: 200,
+          });
+        } else {
+          res.sendError({
+            message: 'Kamu telah melakukan absensi',
+            status: 409,
+          });
+        }
+      } else {
+        res.sendError({
+          message: {
+            email: 'alamat email anda tidak ditemukan',
+          },
+          status: 404,
         });
-      res.sendSuccess({
-        message: {
-          email: message.email_found,
-          namae: datap[0].participant[0].name,
-          idp: datap[0].participant[0].id,
-        },
-        status: 200,
-      });
+      }
     } else {
       res.sendError({
         message: {
-          email: 'alamat email anda tidak ditemukan',
+          email: 'Kamu tidak bisa mengakses halaman ini',
         },
-        status: 409,
+        status: 404,
       });
     }
   },

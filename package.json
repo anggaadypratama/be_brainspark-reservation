@@ -19,6 +19,7 @@
     "express": "^4.17.1",
     "express-group-routes": "^1.1.0",
     "handlebars": "^4.7.7",
+    "googleapis": "^84.0.0",
     "jsonwebtoken": "^8.5.1",
     "module-alias": "^2.2.2",
     "moment": "^2.29.1",
