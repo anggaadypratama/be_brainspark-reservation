@@ -4,6 +4,7 @@ const FILE_TYPE = [
   'image/png',
   'image/jpg',
   'image/jpeg',
+  'image/webp',
 ];
 
 const fileFilter = (req, file, callback) => {
