@@ -2,6 +2,7 @@ const message = require('@utils/messages');
 const stream = require('stream');
 const moment = require('moment');
 const drive = require('@root/src/utils/helpers/driveApis');
+const cached = require('@root/src/utils/helpers/cached');
 const DashboardEventModel = require('./model');
 
 const validationId = new RegExp('^[0-9a-fA-F]{24}$');
@@ -45,6 +46,10 @@ module.exports = {
 
     await DashboardEvent.save((errors) => {
       if (errors) return res.sendError({ status: 500, errors });
+
+      cached.delete('allEvent');
+      cached.delete('allEventDashboard');
+
       return res.sendSuccess({
         status: 201,
         message: message.add_data_success,
@@ -56,33 +61,37 @@ module.exports = {
   getAllEvent: async (req, res) => {
     const isDone = Number(req.query.isFinished) || 0;
 
-    const data = await DashboardEventModel.find()
-      .catch((errors) => errors && res.sendError({ status: 500, errors }));
+    const data = await cached.getOrSet('allEvent', async () => {
+      const dataCache = await DashboardEventModel.find()
+        .catch((errors) => errors && res.sendError({ status: 500, errors }));
 
-    const dataFiltered = await Promise.all(data?.map(async ({
-      _id, themeName, imagePoster, date, eventStart, location, eventEnd,
-    }) => {
-      const isEventDone = moment(eventEnd).format() < moment().format();
-      return ({
-        _id, themeName, imagePoster, date, eventStart, isEventDone, location, eventEnd,
-      });
-    }));
+      const dataFiltered = await Promise.all(dataCache?.map(async ({
+        _id, themeName, imagePoster, date, eventStart, location, eventEnd,
+      }) => {
+        const isEventDone = moment(eventEnd).format() < moment().format();
+        return ({
+          _id, themeName, imagePoster, date, eventStart, isEventDone, location, eventEnd,
+        });
+      }));
+
+      return dataFiltered;
+    });
 
     switch (isDone) {
       case 0:
         return res.sendSuccess({
           status: 200,
-          data: dataFiltered,
+          data,
         });
       case 1:
         return res.sendSuccess({
           status: 200,
-          data: dataFiltered.filter(({ isEventDone }) => isEventDone),
+          data: data.filter(({ isEventDone }) => isEventDone),
         });
       case 2:
         return res.sendSuccess({
           status: 200,
-          data: dataFiltered.filter(({ isEventDone }) => !isEventDone),
+          data: data.filter(({ isEventDone }) => !isEventDone),
         });
       default:
         return res.sendError({
@@ -95,28 +104,11 @@ module.exports = {
   getAllEventProtected: async (req, res) => {
     const isDone = Number(req.query.isFinished) || 0;
 
-    let data = await DashboardEventModel.find()
-      .catch((errors) => errors && res.sendError({ status: 500, errors }));
+    const data = await cached.getOrSet('allEventDashboard', async () => {
+      const dataCache = await DashboardEventModel.find()
+        .catch((errors) => errors && res.sendError({ status: 500, errors }));
 
-    const dataFiltered = await Promise.all(data.map(async ({
-      _id,
-      themeName,
-      description,
-      date,
-      eventStart,
-      eventEnd,
-      speakerName,
-      location,
-      endRegistration,
-      note,
-      isOnlyTelkom,
-      ticketLimit,
-      imagePoster,
-      participant,
-    }) => {
-      const isEventDone = moment(eventEnd).format() < moment().format();
-
-      return {
+      const dataFiltered = await Promise.all(dataCache.map(async ({
         _id,
         themeName,
         description,
@@ -131,25 +123,46 @@ module.exports = {
         ticketLimit,
         imagePoster,
         participant,
-        isEventDone,
-      };
-    }));
+      }) => {
+        const isEventDone = moment(eventEnd).format() < moment().format();
+
+        return {
+          _id,
+          themeName,
+          description,
+          date,
+          eventStart,
+          eventEnd,
+          speakerName,
+          location,
+          endRegistration,
+          note,
+          isOnlyTelkom,
+          ticketLimit,
+          imagePoster,
+          participant,
+          isEventDone,
+        };
+      }));
+
+      return dataFiltered;
+    });
 
     switch (isDone) {
       case 0:
         return res.sendSuccess({
           status: 200,
-          data: dataFiltered,
+          data,
         });
       case 1:
         return res.sendSuccess({
           status: 200,
-          data: dataFiltered.filter(({ isEventDone }) => isEventDone),
+          data: data.filter(({ isEventDone }) => isEventDone),
         });
       case 2:
         return res.sendSuccess({
           status: 200,
-          data: dataFiltered.filter(({ isEventDone }) => !isEventDone),
+          data: data.filter(({ isEventDone }) => !isEventDone),
         });
       default:
         return res.sendError({
@@ -168,58 +181,62 @@ module.exports = {
         status: 404,
       });
     } else {
-      await DashboardEventModel.findById(idEvent, (errors, data) => {
-        if (errors) return res.sendError({ status: 500, errors });
-        if (!data) return res.sendError({ status: 404, message: message.data_notfound });
+      const data = await cached.getOrSet(idEvent, async () => {
+        const detailCache = await DashboardEventModel.findById(idEvent)
+          .catch((errors) => res.sendError({ status: 500, errors }));
 
-        const {
-          _id: id,
+        return detailCache;
+      });
+
+      if (!data) res.sendError({ status: 404, message: message.data_notfound });
+
+      const {
+        _id: id,
+        themeName,
+        date,
+        eventStart,
+        eventEnd,
+        speakerName,
+        location,
+        linkLocation,
+        endRegistration,
+        isFinished,
+        registrationClosed,
+        isOnlyTelkom,
+        description,
+        ticketLimit,
+        imagePoster,
+        imageId,
+        participant,
+        isAbsentActive,
+      } = data;
+
+      const note = data?.note ?? {};
+
+      res.sendSuccess({
+        status: 200,
+        data: {
+          id,
           themeName,
           date,
           eventStart,
           eventEnd,
           speakerName,
           location,
-          linkLocation,
           endRegistration,
           isFinished,
           registrationClosed,
           isOnlyTelkom,
-          description,
+          linkLocation,
           ticketLimit,
           imagePoster,
           imageId,
-          participant,
+          description,
+          isEventDone: moment(eventEnd).format() < moment().format(),
+          note,
+          totalParticipant: participant?.length,
           isAbsentActive,
-        } = data;
-
-        const note = data?.note ?? {};
-
-        return res.sendSuccess({
-          status: 200,
-          data: {
-            id,
-            themeName,
-            date,
-            eventStart,
-            eventEnd,
-            speakerName,
-            location,
-            endRegistration,
-            isFinished,
-            registrationClosed,
-            isOnlyTelkom,
-            linkLocation,
-            ticketLimit,
-            imagePoster,
-            imageId,
-            description,
-            isEventDone: moment(eventEnd).format() < moment().format(),
-            note,
-            totalParticipant: participant.length,
-            isAbsentActive,
-          },
-        });
+        },
       });
     }
   },
@@ -233,60 +250,64 @@ module.exports = {
         status: 404,
       });
     } else {
-      await DashboardEventModel.findById(idEvent, (errors, data) => {
-        if (errors) return res.sendError({ status: 500, errors });
-        if (!data) return res.sendError({ status: 404, message: message.data_notfound });
+      const data = await cached.getOrSet(idEvent, async () => {
+        const detailCache = await DashboardEventModel.findById(idEvent)
+          .catch((errors) => res.sendError({ status: 500, errors }));
 
-        const {
-          _id: id,
+        return detailCache;
+      });
+
+      if (!data) res.sendError({ status: 404, message: message.data_notfound });
+
+      const {
+        _id: id,
+        themeName,
+        date,
+        eventStart,
+        eventEnd,
+        speakerName,
+        location,
+        linkLocation,
+        endRegistration,
+        isFinished,
+        registrationClosed,
+        isOnlyTelkom,
+        description,
+        ticketLimit,
+        imagePoster,
+        imageId,
+        participant,
+        isAbsentActive,
+        isLinkLocation,
+      } = data;
+
+      const note = data?.note ?? {};
+
+      res.sendSuccess({
+        status: 200,
+        data: {
+          id,
           themeName,
           date,
           eventStart,
           eventEnd,
           speakerName,
           location,
-          linkLocation,
           endRegistration,
           isFinished,
           registrationClosed,
           isOnlyTelkom,
-          description,
+          linkLocation,
           ticketLimit,
           imagePoster,
           imageId,
-          participant,
+          description,
+          isEventDone: moment(eventEnd).format() < moment().format(),
+          note,
+          totalParticipant: participant.length,
           isAbsentActive,
           isLinkLocation,
-        } = data;
-
-        const note = data?.note ?? {};
-
-        return res.sendSuccess({
-          status: 200,
-          data: {
-            id,
-            themeName,
-            date,
-            eventStart,
-            eventEnd,
-            speakerName,
-            location,
-            endRegistration,
-            isFinished,
-            registrationClosed,
-            isOnlyTelkom,
-            linkLocation,
-            ticketLimit,
-            imagePoster,
-            imageId,
-            description,
-            isEventDone: moment(eventEnd).format() < moment().format(),
-            note,
-            totalParticipant: participant.length,
-            isAbsentActive,
-            isLinkLocation,
-          },
-        });
+        },
       });
     }
   },
@@ -300,6 +321,10 @@ module.exports = {
         status: 404,
       });
     } else {
+      cached.delete(id);
+      cached.delete('allEvent');
+      cached.delete('allEventDashboard');
+
       const removeImage = async (imgId) => {
         try {
           await drive.delete(imgId)
@@ -348,6 +373,10 @@ module.exports = {
       if (!req.file) {
         res.sendError({ message: message.upload_image_problem, status: 422 });
       }
+
+      cached.delete('allEvent');
+      cached.delete('allEventDashboard');
+      cached.delete(id);
 
       const removeImage = async (imgId) => {
         await drive.delete(imgId)

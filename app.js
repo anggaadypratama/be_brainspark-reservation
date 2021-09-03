@@ -2,7 +2,7 @@ require('module-alias/register');
 require('express-group-routes');
 require('dotenv').config();
 
-require('@utils/database/connection');
+require('@root/src/utils/database/mongo');
 
 const express = require('express');
 const compression = require('compression');
@@ -19,12 +19,16 @@ const port = process.env.PORT || 3000;
 
 // middleware
 app.use(cors({
-  origin: '*',
+  origin: [
+    'https://rplgdc-brainspark.vercel.app',
+    'http://localhost:8080',
+    'http://localhost:5000',
+  ],
 }));
 app.use(middleware);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(compression());
+app.use(compression({ level: 9 }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static('public/images'));
 

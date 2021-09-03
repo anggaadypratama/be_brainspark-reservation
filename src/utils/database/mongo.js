@@ -9,9 +9,9 @@ mongoose.connect(dbConnection, {
   useUnifiedTopology: true,
   useFindAndModify: false,
 }).then(() => {
-  console.log('terhubung ke database!');
+  console.log('terhubung ke database mongoDB!');
 })
   .catch((err) => {
-    console.log('tidak dapat terhubung ke database!', err);
+    console.log('tidak dapat terhubung ke database mongoDB!', err);
     process.exit();
   });
