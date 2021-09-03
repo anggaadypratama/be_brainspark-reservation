@@ -19,11 +19,7 @@ const port = process.env.PORT || 3000;
 
 // middleware
 app.use(cors({
-  origin: [
-    'https://rplgdc-brainspark.vercel.app',
-    'http://localhost:8080',
-    'http://localhost:5000',
-  ],
+  origin: '*',
 }));
 app.use(middleware);
 app.use(express.urlencoded({ extended: true }));
