@@ -403,8 +403,6 @@ module.exports = {
 
       let {
         isOnlyTelkom: onlyTelkom,
-        note: notes,
-        description: desc,
         ticketLimit: ticketLim,
         ...stringData
       } = req.body;
@@ -419,6 +417,8 @@ module.exports = {
         ticketLimit,
         ...stringData,
       };
+
+      console.log(data);
 
       const dataUpdate = await DashboardEventModel
         .findByIdAndUpdate(id, data, { new: true })
