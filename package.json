@@ -30,6 +30,7 @@
     "nodemailer-express-handlebars": "^4.0.0",
     "nodemailer-smtp-transport": "^2.7.4",
     "nodemon": "^2.0.12",
+    "redis": "^3.1.2",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

@@ -2,6 +2,7 @@ const message = require('@utils/messages');
 
 const validationId = new RegExp('^[0-9a-fA-F]{24}$');
 const mail = require('@utils/helpers/mail');
+const cached = require('@root/src/utils/helpers/cached');
 const DashboardEventModel = require('../DashboardEvent/model');
 
 module.exports = {
@@ -10,8 +11,9 @@ module.exports = {
     const { email } = req.body;
     const info = req.body;
     const emailDB = await DashboardEventModel.exists({ _id: id, 'participant.email': email })
-      .catch((err) => console.log(''));
-    const userDB = await DashboardEventModel.exists({ _id: id }).catch((err) => console.log(''));
+      .catch((errors) => res.sendError({ errors }));
+    const userDB = await DashboardEventModel.exists({ _id: id })
+      .catch((errors) => res.sendError({ errors }));
 
     if (!validationId.test(id)) {
       res.sendError({
@@ -38,7 +40,7 @@ module.exports = {
             res.sendError({ errors });
           }
         });
-      const idp = await DashboardEventModel
+      await DashboardEventModel
         .find({ _id: id }, { participant: { $elemMatch: { email } } });
 
       const dataEmail = await DashboardEventModel.findById(id);
@@ -65,7 +67,6 @@ module.exports = {
         email,
       };
 
-      // mail.sendMails(id, idp[0].participant[0].id);
       mail.send(sendData);
       res.sendSuccess({ message: message.add_data_success, status: 200 });
     }
@@ -75,7 +76,7 @@ module.exports = {
     const { id } = req.params;
     const { email } = req.query;
     const emailDB = await DashboardEventModel.exists({ _id: id, 'participant.email': email })
-      .catch((err) => console.log(''));
+      .catch((errors) => res.sendError({ errors }));
     if (emailDB) {
       const idp = await DashboardEventModel
         .find({ _id: id }, { participant: { $elemMatch: { email } } });
@@ -86,11 +87,9 @@ module.exports = {
           email: message.email_found,
           nama: idp[0].participant[0].name,
           idp: idp[0].participant[0].id,
-          is,
         },
         status: 200,
       });
-      console.log('is : ', is);
     } else {
       res.sendError({
         message: {
@@ -105,14 +104,16 @@ module.exports = {
     const { id } = req.params;
     const { email, feedback } = req.body;
 
-    const dataEvent = await DashboardEventModel.findById(id)
-      .catch((err) => err && res.sendError({
-        message: 'Id Tidak ditemukan',
-      }));
+    const dataEvent = await cached.getOrSet(id, async () => {
+      const detailCache = await DashboardEventModel.findById(id)
+        .catch((errors) => res.sendError({ status: 500, errors }));
+
+      return detailCache;
+    });
 
     if (dataEvent?.isAbsentActive) {
       const emailDB = await DashboardEventModel.exists({ _id: id, 'participant.email': email })
-        .catch((err) => console.log(''));
+        .catch((errors) => res.sendError({ errors }));
 
       if (emailDB) {
         const datap = await DashboardEventModel.find({ _id: id },
