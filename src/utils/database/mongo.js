@@ -7,10 +7,11 @@ mongoose.Promise = global.Promise;
 mongoose.connect(dbConnection, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  useFindAndModify: false,
 }).then(() => {
-  console.log('Connected to the database!');
+  console.log('terhubung ke database mongoDB!');
 })
   .catch((err) => {
-    console.log('Cannot connect to the database!', err);
+    console.log('tidak dapat terhubung ke database mongoDB!', err);
     process.exit();
   });
