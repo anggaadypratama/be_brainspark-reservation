@@ -42,6 +42,8 @@ module.exports = {
         });
 
       cached.delete(id);
+      cached.delete('allEvent');
+      cached.delete('allEventDashboard');
       await DashboardEventModel
         .find({ _id: id }, { participant: { $elemMatch: { email } } });
 
@@ -133,6 +135,7 @@ module.exports = {
               }
             });
 
+          cached.delete(id);
           cached.delete('allEvent');
           cached.delete('allEventDashboard');
 
