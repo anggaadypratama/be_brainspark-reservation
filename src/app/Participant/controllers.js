@@ -4,7 +4,6 @@ const validationId = new RegExp('^[0-9a-fA-F]{24}$');
 const mail = require('@utils/helpers/mail');
 const cached = require('@root/src/utils/helpers/cached');
 const DashboardEventModel = require('../DashboardEvent/model');
-const cached = require('@root/src/utils/helpers/cached');
 
 module.exports = {
   inputPart: async (req, res) => {
@@ -132,9 +131,9 @@ module.exports = {
               }
             });
 
-            cached.delete('allEvent');
-            cached.delete('allEventDashboard');
-            
+          cached.delete('allEvent');
+          cached.delete('allEventDashboard');
+
           res.sendSuccess({
             message: {
               email: message.email_found,
