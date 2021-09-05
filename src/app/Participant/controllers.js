@@ -40,6 +40,8 @@ module.exports = {
             res.sendError({ errors });
           }
         });
+
+      cached.delete(id);
       await DashboardEventModel
         .find({ _id: id }, { participant: { $elemMatch: { email } } });
 
