@@ -9,8 +9,8 @@ const cached = {
         resolve(JSON.parse(data));
       } else {
         const freshData = await cb();
-        redisClient.setex(key, process.env.CACHED_EXPIRATION, JSON.stringify(freshData));
         resolve(freshData);
+        await redisClient.setex(key, process.env.CACHED_EXPIRATION, JSON.stringify(freshData));
         console.log('data mongo');
       }
     });
