@@ -33,7 +33,7 @@ const mail = {
       template: 'index',
       context: {
         date: moment(date).format('dddd, Do MMMM YYYY'),
-        eventStart: `${moment(eventStart).format('h:mm')} WIB`,
+        eventStart: `${moment(eventStart).format('HH:mm')} WIB`,
         ...props,
       },
       attachments: [
